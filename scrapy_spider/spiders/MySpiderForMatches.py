@@ -109,8 +109,8 @@ class MySpiderForMatches(CrawlSpider):
             attributes["home_ht_team_score"] =  "nil"
 
         try :      
-            attributes["home_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[0].replace("Starting Line-up:","").strip()
-            attributes["away_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[1].replace("Starting Line-up:","").strip()
+            attributes["home_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[0].replace("Starting Line-up:"," ").strip()
+            attributes["away_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[1].replace("Starting Line-up:"," ").strip()
         except:
             attributes["home_formation"] =   "nil" 
             attributes["away_formation"] =   "nil"        
