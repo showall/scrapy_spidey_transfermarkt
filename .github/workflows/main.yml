@@ -30,6 +30,15 @@ jobs:
           python-version: '3.7'
       - name: Install requirements
         run: pip install -r requirements.txt
+      - name: Step 1 - Create a temporary artifact downloads folder
+        run: mkdir  output_folder
+        
+      - name: Step 3 - Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
+        with: 
+          name: anyname
+          path: output_folder
+        
       - name: Run Scraper
         run:  scrapy crawl match_logs -a domain=https://www.transfermarkt.com/premier-league/startseite/wettbewerb/GB1
 
