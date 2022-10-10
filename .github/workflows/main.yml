@@ -29,7 +29,5 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
       - name: Run Scraper
-        run:  | 
-        scrapy crawl match_logs -a domain=https://www.transfermarkt.com/premier-league/startseite/wettbewerb/GB1
-
+        run:  scrapy crawl match_logs -a domain=https://www.transfermarkt.com/premier-league/startseite/wettbewerb/GB1
 
