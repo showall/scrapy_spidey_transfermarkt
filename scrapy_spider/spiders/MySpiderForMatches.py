@@ -13,7 +13,7 @@ class MySpiderForMatches(CrawlSpider):
         "DOWNLOAD_TIMEOUT" : 20,
         "CONCURRENT_REQUESTS" : 20,
         'FEEDS': {
-            '%(name)s.csv': {
+            'output_folder/%(name)s.csv': {
                 'format': 'csv',
                 'overwrite': True
             }
