@@ -29,7 +29,7 @@ class MySpiderForPlayers(CrawlSpider):
 
 
     rules = (
-    #    Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
+        Rule(LinkExtractor(allow = r'startseite\/wettbewerb'), follow=False),
         Rule(LinkExtractor(allow = r'startseite\/verein.*saison_id\/\d{3}2'), callback='parse_club_links', follow=False),
      #   Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
      )

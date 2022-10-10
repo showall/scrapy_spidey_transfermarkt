@@ -20,26 +20,51 @@ class MySpiderForMatches(CrawlSpider):
         }
     }    
     
-    def __init__(self, domain='', *args, **kwargs):
+    def __init__(self, domain='', start=1, end=1, season_id=2022, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if domain != '':
             self.start_urls = [domain]
         else:
             self.start_urls =  ["https://www.transfermarkt.com/manchester-united/spielplan/verein/985/saison_id/2022"]
 
-
+        self.start_weekday = start
+        self.end_weekday = end
+        self.season_id = season_id
 
     rules = (
     #    Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
-      #  Rule(LinkExtractor(allow = r'startseite\/verein.*saison_id\/\d{3}2'), callback='parse_club_links', follow=False),
-        Rule(LinkExtractor(allow = r'spielplan\/verein.*saison_id\/\d{3}2'), follow=True),     
-        Rule(LinkExtractor(allow = r'spielbericht\/index'), callback='parse_club_links_2', follow=False),    
-    # Rule(LinkExtractor(allow = r'aufstellung\/spielbericht'), callback='parse_match_sheet_sub', follow=False),   
-        #   Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
+         Rule(LinkExtractor(allow = r'((premier-league)|(laliga)|(serie-a)|(bundesliga)|(ligue-1)|(liga-portugal)|(super-lig)|(eredivisie)|(jupiler-pro-league))\/startseite\/wettbewerb'), follow=True),
+         Rule(LinkExtractor(allow = r'startseite\/verein'), follow=True),
+         Rule(LinkExtractor(allow = r'spielplan\/verein.*saison_id\/\d{3}2'), callback='parse_club_links_2', follow=False),     
+    #     Rule(LinkExtractor(allow = r'gesamtspielplan\/wettbewerb.*saison_id\/\d{3}2'), callback='parse_club_links_1', follow=False),     if go by Fixture page
     )
 
+    def parse_club_links_1(self,response):
+      #  print(response)    
+        link = response.url 
+        try :
+            link =  re.sub(r"\/saison_id\/\d{4}","", link)
+        except :
+            pass
+
+        url_link = link + f"?saison_id={self.season_id}&spieltagVon={self.start_weekday}&spieltagBis={self.end_weekday}"
+       #print (url_link)
+
+
+        yield scrapy.Request(url=url_link, callback=self.parse_club_links_2, headers={'User-Agent': 'Custom'}, dont_filter=True)
+
+
     def parse_club_links_2(self,response):
-  
+        extracted_scoreline_from_link = response.xpath("//a[contains(@href, 'index/spielbericht')]//text()").extract()
+
+        for i in range(len(extracted_scoreline_from_link)) :
+            if re.search(r"\d+:\d+", extracted_scoreline_from_link[i].strip()) != None:
+                response_1 = response.xpath("//a[contains(@href, 'index/spielbericht')]//@href").extract()[i]  
+            yield scrapy.Request(url=response.urljoin(response_1), callback=self.parse_club_links_3, headers={'User-Agent': 'Custom'}, dont_filter=True)
+
+
+    def parse_club_links_3(self,response):
+      #  print (response)
         attributes = {}
         attributes["match_id"] = response.url.split("/")[-1]
         attributes["home_tag"] = response.xpath('//a[@class="sb-vereinslink"]/@href').getall()[0].strip().split("/")[1]          
@@ -47,6 +72,8 @@ class MySpiderForMatches(CrawlSpider):
         matchsheet_link =  f'https://www.transfermarkt.com/{attributes["home_tag"]}_{attributes["away_tag"]}/index/spielbericht/{attributes["match_id"]}'
         yield scrapy.Request(url=matchsheet_link, callback=self.parse_match_sheet, headers={'User-Agent': 'Custom'}, 
         meta = {"attributes" : attributes}, dont_filter=True)
+
+
 
     def parse_match_sheet(self,response):
         
@@ -109,8 +136,8 @@ class MySpiderForMatches(CrawlSpider):
             attributes["home_ht_team_score"] =  "nil"
 
         try :      
-            attributes["home_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[0].replace("Starting Line-up:"," ").strip()
-            attributes["away_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[1].replace("Starting Line-up:"," ").strip()
+            attributes["home_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[0].replace("Starting Line-up:","#").strip()
+            attributes["away_formation"] = response.xpath('//*[@class="large-7 aufstellung-vereinsseite columns small-12 unterueberschrift aufstellung-unterueberschrift"]/text()').getall()[1].replace("Starting Line-up:","#").strip()
         except:
             attributes["home_formation"] =   "nil" 
             attributes["away_formation"] =   "nil"        
@@ -186,8 +213,11 @@ class MySpiderForMatches(CrawlSpider):
     def parse_match_stats(self,response):
         #### THE POSSESSION% STILL A PROBLEM
         attributes = response.meta["attributes"]
-        attributes["available_capacity"] =  response.xpath('//th[contains(text(),"Available Capacity:")]/following-sibling::*/text()').get().replace(".","")
+        try:
+            attributes["available_capacity"] =  response.xpath('//th[contains(text(),"Available Capacity:")]/following-sibling::*/text()').get().replace(".","")
     
+        except:
+            pass
         try:   
             attributes["home_total_shots"] = response.xpath('//div[@class="sb-statistik-zahl"]/text()').getall()[0]
             attributes["away_total_shots"] = response.xpath('//div[@class="sb-statistik-zahl"]/text()').getall()[1]
