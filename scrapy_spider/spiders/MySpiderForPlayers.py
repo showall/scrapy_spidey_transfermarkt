@@ -8,25 +8,31 @@ class MySpiderForPlayers(CrawlSpider):
     name = "player_stats"
     allowed_domains = ["www.transfermarkt.com"]
     #start_urls = ["https://www.transfermarkt.com/wettbewerbe/europa/wettbewerbe?ajax=yw1&page=1"]
-    start_urls =  ['https://www.transfermarkt.com/premier-league/startseite/wettbewerb/GB1']
     custom_settings = {
         "DOWNLOAD_DELAY" : 4,
-        "DOWNLOAD_TIMEOUT" : 900000,
+        "DOWNLOAD_TIMEOUT" : 30,
         "CONCURRENT_REQUESTS" : 20,
         'FEEDS': {
-            '%(name)s.csv': {
+            'output_folder/%(name)s.csv': {
                 'format': 'csv',
                 'overwrite': True
             }
         }
-    }    
+    }     
     
+    def __init__(self, domain='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if domain != '':
+            self.start_urls = [domain]
+        else:
+            self.start_urls =  ["https://www.transfermarkt.com/premier-league/startseite/wettbewerb/GB1"]
+
+
     rules = (
     #    Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
         Rule(LinkExtractor(allow = r'startseite\/verein.*saison_id\/\d{3}2'), callback='parse_club_links', follow=False),
      #   Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
-    )
-    
+     )
 
     def parse_club_links(self, response):
         club_links = response.xpath('//*[@class="responsive-table"]//tbody//a//@href')
@@ -35,7 +41,8 @@ class MySpiderForPlayers(CrawlSpider):
                 yield scrapy.Request(response.urljoin(title), callback=self.parse_players, headers={'User-Agent': 'Custom'})
             else:
                 continue
-    
+
+
     def parse_players(self, response):
         print(response.url)
         attributes = {}

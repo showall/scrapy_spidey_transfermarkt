@@ -32,7 +32,7 @@ class MySpiderForMatches(CrawlSpider):
     rules = (
     #    Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
       #  Rule(LinkExtractor(allow = r'startseite\/verein.*saison_id\/\d{3}2'), callback='parse_club_links', follow=False),
-        Rule(LinkExtractor(allow = r'spielplan\/verein.*saison_id\/\d{3}2'), follow=False),     
+        Rule(LinkExtractor(allow = r'spielplan\/verein.*saison_id\/\d{3}2'), follow=True),     
         Rule(LinkExtractor(allow = r'spielbericht\/index'), callback='parse_club_links_2', follow=False),    
     # Rule(LinkExtractor(allow = r'aufstellung\/spielbericht'), callback='parse_match_sheet_sub', follow=False),   
         #   Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
