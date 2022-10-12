@@ -29,7 +29,7 @@ class MySpiderForPlayers(CrawlSpider):
 
 
     rules = (
-        Rule(LinkExtractor(allow = r'startseite\/wettbewerb'), follow=False),
+        Rule(LinkExtractor(allow = r'startseite\/wettbewerb'), follow=True),
         Rule(LinkExtractor(allow = r'startseite\/verein.*saison_id\/\d{3}2'), callback='parse_club_links', follow=False),
      #   Rule(LinkExtractor(allow = r'profil\/spieler'), callback='parse_players', follow=True)
      )
@@ -92,15 +92,42 @@ class MySpiderForPlayers(CrawlSpider):
         except:
             attributes['highest_market_value_on'] = "unknown" 
        # attributes['full_name'] = response.xpath('//span[contains(text(),"ame")]/following-sibling::*/text()').get().strip()
-        attributes['date_of_birth'] = response.xpath('//span[contains(text(),"Date of birth")]/following-sibling::*/a/text()').get().strip()
-        attributes['place_of_birth'] = response.xpath('//span[contains(text(),"Place of birth")]/following-sibling::*/span/text()').get().strip()
-        attributes['country_of_birth'] =  response.xpath('//span[contains(text(),"Place of birth")]/following-sibling::*/span/img/@alt').get().strip()
-        attributes['height'] = response.xpath('//span[contains(text(),"Height")]/following-sibling::*/text()').get().strip().replace("\xa0m","").replace(",","")            
-        attributes['citizenship'] = response.xpath('//span[contains(text(),"Citizenship")]/following-sibling::span/img[@class="flaggenrahmen"]/@alt').extract()
-        attributes['dominant_foot'] = response.xpath('//span[contains(text(),"Foot")]/following-sibling::*/text()').get().strip()            
-        attributes['current_club'] =  response.xpath('//span[contains(text(),"Current club")]/following-sibling::*/a/img/@alt').get().strip()           
-        attributes['joined_on'] =  response.xpath('//span[contains(text(),"Joined")]/span/text()').get().strip()             
-        attributes['contract_expiring'] =  response.xpath('//span[contains(text(),"Contract expires")]/following-sibling::*/text()').get().strip()              
+        try:
+            attributes['date_of_birth'] = response.xpath('//span[contains(text(),"Date of birth")]/following-sibling::*/a/text()').get().strip()
+        except:
+            attributes['date_of_birth'] = ""
+        try:
+            attributes['place_of_birth'] = response.xpath('//span[contains(text(),"Place of birth")]/following-sibling::*/span/text()').get().strip()
+        except:
+            attributes['place_of_birth'] = ""
+        try:
+            attributes['country_of_birth'] =  response.xpath('//span[contains(text(),"Place of birth")]/following-sibling::*/span/img/@alt').get().strip()
+        except:
+            attributes['country_of_birth'] =  ""         
+        try:
+            attributes['height'] = response.xpath('//span[contains(text(),"Height")]/following-sibling::*/text()').get().strip().replace("\xa0m","").replace(",","")            
+        except:
+            attributes['height'] = ""
+        try:        
+            attributes['citizenship'] = response.xpath('//span[contains(text(),"Citizenship")]/following-sibling::span/img[@class="flaggenrahmen"]/@alt').extract()
+        except:
+            attributes['citizenship'] = ""           
+        try:
+            attributes['dominant_foot'] = response.xpath('//span[contains(text(),"Foot")]/following-sibling::*/text()').get().strip()     
+        except:
+            attributes['dominant_foot'] = ""         
+        try:
+            attributes['current_club'] =  response.xpath('//span[contains(text(),"Current club")]/following-sibling::*/a/img/@alt').get().strip()           
+        except:
+             attributes['current_club'] = ""
+        try:
+            attributes['joined_on'] =  response.xpath('//span[contains(text(),"Joined")]/span/text()').get().strip()              
+        except:
+            attributes['joined_on'] = ""
+        try:  
+            attributes['contract_expiring'] =  response.xpath('//span[contains(text(),"Contract expires")]/following-sibling::*/text()').get().strip()              
+        except:
+             attributes['contract_expiring'] =  ""                 
         try:
             attributes['last_extension'] =  response.xpath('//span[contains(text(),"Date of last contract extension:")]/following-sibling::*/text()').get().strip()              
         except:
