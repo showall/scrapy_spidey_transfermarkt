@@ -60,7 +60,7 @@ class MySpiderForMatches(CrawlSpider):
         for i in range(len(extracted_scoreline_from_link)) :
             if re.search(r"\d+:\d+", extracted_scoreline_from_link[i].strip()) != None:
                 response_1 = response.xpath("//a[contains(@href, 'index/spielbericht')]//@href").extract()[i]  
-            yield scrapy.Request(url=response.urljoin(response_1), callback=self.parse_club_links_3, headers={'User-Agent': 'Custom'}, dont_filter=True)
+                yield scrapy.Request(url=response.urljoin(response_1), callback=self.parse_club_links_3, headers={'User-Agent': 'Custom'}, dont_filter=True)
 
 
     def parse_club_links_3(self,response):
