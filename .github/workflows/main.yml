@@ -34,7 +34,7 @@ jobs:
         run: mkdir-p  output_folder
   
       - name: Run Scraper
-        run:  scrapy crawl match_logs -a domain=https://www.transfermarkt.com/premier-league/startseite/wettbewerb/GB1
+        run:  scrapy crawl match_logs -a domain=https://www.transfermarkt.com/wettbewerbe/europa -a end=10
         
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
